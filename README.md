@@ -1,6 +1,11 @@
 # ECE199 SP2022
 
 ## -Usable Objects
+***Must Include***
+```python
+import pybullet_data as pd
+pybullet.setAdditionalSearchPath(pd.getDataPath())
+```
 ### URDF
 ```python
 pybullet.loadURDF(PATH)
