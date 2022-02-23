@@ -7,9 +7,9 @@ pybullet.loadURDF(PATH)
 ```
 |No.|Object Name|Load URDF Path|
 |----|---|----|
-|1|Table|"data/table/table.urdf"|
-|2|Tray|"data/tray/traybox.urdf"|
-|3|Racecar|"data/racecar/racecar.urdf"|
+|1|Table|"/data/table/table.urdf"|
+|2|Tray|"/data/tray/traybox.urdf"|
+|3|Racecar|"/data/racecar/racecar.urdf"|
 |4|Plate(Bowl?)|"/data/dinnerware/plate.urdf"|
 |5|Cup|"/data/dinnerware/cup/cup_small.urdf"|
 |6|Lego(very small)|"/data/lego/lego.urdf"|
@@ -23,4 +23,4 @@ pybullet.loadSoftBody(OBJ_PATH,simFileName=VTK_PATH)
 ```
 |No.|Object Name|Load Soft Body Path|
 |----|---|----|
-|1|Banana|"data/banana.obj","data/banana.vtk"|
+|1|Banana|"/data/banana.obj","/data/banana.vtk"|
