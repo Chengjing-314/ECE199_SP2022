@@ -57,7 +57,7 @@ intrin = np.array([[f, 0, IMG_LEN/2 + 0.5], # -1
 
 extrin = np.array(list(viewMatrix)).reshape((4,4))
 
-rgbImg = rgbImg[:,:,:3] * rgbImg[:,:,3:4]
+rgbImg = rgbImg[:,:,:3]
 
 intrinsic = o3d.camera.PinholeCameraIntrinsic()
 intrinsic.intrinsic_matrix = intrin
