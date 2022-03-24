@@ -192,7 +192,7 @@ def buffer_to_rgbd(rgbImg, depthImg):
     return rgbd
     
 
-viewMatrix = get_view_matrix([0, 1, 1], 
+viewMatrix = get_view_matrix([-1, 1, 1], 
                              [0, 0, 0], 
                              [0, 0, 1])
 
@@ -234,8 +234,6 @@ color = (color * 255).astype(np.uint8)
 
 recover = np.zeros((IMG_LEN, IMG_LEN, 3)).astype(np.uint8)
 
-
-image = np.floor(image)
 image = np.rint(image).astype(np.int64)
 
 for i in range(image.shape[1]):
