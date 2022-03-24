@@ -1,3 +1,4 @@
+from ctypes.wintypes import RGB
 import pybullet as p
 import pybullet_data as pd
 import numpy as np
@@ -9,8 +10,6 @@ p.setGravity(0, 0, -10)
 
 # Extend object search path
 p.setAdditionalSearchPath(pd.getDataPath()) 
-
-print(pd.getDataPath())
 
 
 planeId = p.loadURDF("plane.urdf")
@@ -26,9 +25,19 @@ IMG_LEN = 1024
 FOV = 60
 NEAR = 0.1
 FAR = 5.1
+f = (IMG_LEN // 2) * 1 / (np.tan(np.deg2rad(FOV)/2)) # Focal length
 
 
 def to_homog(points):
+    """
+    Transform points from cartesian coordinates to homogenous coordinates.
+
+    Args:
+        points (numpy ndarray): 3 * n  numpy array.
+
+    Returns:
+        homogenous transform of the coordinates, 4 * n numpy array.
+    """
     N = points.shape[1]
     D = points.shape[0]
     One = np.ones((1,N))
@@ -36,98 +45,192 @@ def to_homog(points):
     return points_homog
 
 def from_homog(points_homog):
+    """
+    Transform points from homogenous coordinates to cartesion coordinates.
+
+    Args:
+        points_homog (numpy ndarray): 3 * n numpy array.
+
+    Returns:
+        cartesion transform of the coordinates, 2 * n numpy array.
+    """
     N = points_homog.shape[1]
     D = points_homog.shape[0]
     points_homog = points_homog / points_homog[D-1,:]
     points = np.delete(points_homog,D-1,0)
     return points
 
-viewMatrix = p.computeViewMatrix(
-    cameraEyePosition=[0, 1, 2],
-    cameraTargetPosition=[0, 0, 0],
-    cameraUpVector=[0, 0, 1])
 
-projectionMatrix = p.computeProjectionMatrixFOV(
-    fov=FOV,
-    aspect=1.0,
-    nearVal=NEAR,
-    farVal=FAR)
+#p.computeViewMatrix(cameraEyePosition=[0, 1, 2],
+      #                         cameraTargetPosition=[0, 0, 0],
+     #                          cameraUpVector=[0, 0, 1])
 
-width, height, rgbImg, depthImg, segImg = p.getCameraImage( # img are numpy array
-    width=IMG_LEN, 
-    height=IMG_LEN,
-    viewMatrix=viewMatrix,
-    projectionMatrix=projectionMatrix)
+def get_view_matrix(eye_pos, target_pos, camera_up_vec):
+    """
+    Calculate camera viewMatrix(extrinsic matrix)
 
+    Args:
+        eye_pos (list):  The position of the camera in world frame.
+        target_pos (list): The position of the target. 
+        camera_up_vec (list): The up direction of the camera.
 
-
-f = (IMG_LEN // 2) * 1 / (np.tan(np.deg2rad(FOV)/2))
-
-
-
-#FIXME
-intrin = np.array([[f, 0, (IMG_LEN-1) / 2], # -1
-                   [0, f, (IMG_LEN-1) / 2],
-                   [0, 0, 1]])
-
-# intrin = np.array([[f, 0, 0], # -1
-#               [0, f, 0],
-#               [0, 0, 1]])
-
-extrin = np.array(list(viewMatrix)).reshape((4,4))
-
-rgbImg = rgbImg[:,:,:3]
-
-intrinsic = o3d.camera.PinholeCameraIntrinsic(IMG_LEN, IMG_LEN, f, f, (IMG_LEN-1) / 2, (IMG_LEN-1) / 2)
-cam = o3d.camera.PinholeCameraParameters()
-cam.intrinsic = intrinsic
-cam.extrinsic = extrin
-
-# depth_tiny = far * near / (far - (far - near) * depth_buffer_tiny)
-
-depthImg = depthImg[:, :, None]
-
-depthIMG = 2 * depthImg - 1
-depthImg = 2 * FAR * NEAR / (FAR + NEAR - (FAR-NEAR) * depthImg)
+    Returns:
+       
+    """
+    return p.computeViewMatrix(cameraEyePosition=eye_pos,
+                               cameraTargetPosition=target_pos,
+                               cameraUpVector=camera_up_vec)
 
 
-# depthImg = depthImg * (FAR - NEAR) + NEAR
+def get_projection_matrix(fov=FOV, aspect = 1.0, nearVal = NEAR, farVal = FAR):
+    return  p.computeProjectionMatrixFOV(fov=fov,
+                                         aspect=aspect,
+                                         nearVal=nearVal,
+                                         farVal=farVal)
 
 
+def get_image(viewMatrix, projectionMatrix, width = IMG_LEN, height = IMG_LEN):
+    """
+    Get the image from the pybullet synthetic camera. 
+    Args:
+        viewMatrix: Camera view matrix(extrinsic matirx) from get_view_matrix.
+        projectionMatrix: Camera projection matrix(OpenGL projection matrix) from get_projection_matrix.
+        width: image width, Defaults to IMG_LEN.
+        height: image height. Defaults to IMG_LEN.
 
-depth_as_img = o3d.geometry.Image((depthImg * 1000).astype(np.uint16))
+    Returns:
+        width, height, RGB_image, Depth_image, Segmentation_image
+    """
+    width, height, RGB_img, Depth_img, segmentation_img = p.getCameraImage(
+                                                                    width=width, 
+                                                                  height=height,
+                                                          viewMatrix=viewMatrix,
+                                              projectionMatrix=projectionMatrix)
+    
+    RGB_img = RGB_img[:,:,:3] # Dropped Alha Channel
+    Depth_img = Depth_img[:,:,None] # Add thrid axis
+    return width, height, RGB_img, Depth_img, segmentation_img 
 
-rgbd_as_img = o3d.geometry.Image((rgbImg).astype(np.uint8))
 
-rgbd = o3d.geometry.RGBDImage.create_from_color_and_depth(rgbd_as_img, depth_as_img, convert_rgb_to_intensity=False, depth_trunc = 1000)
+def get_intrin(): 
+    """
+    Calculate the intrinsic matrix of camera.
+
+    Returns:
+         a numpy array of the intrisinc camera
+    """
+    return np.array([[f, 0, (IMG_LEN-1) / 2], 
+                     [0, f, (IMG_LEN-1) / 2],
+                     [0, 0, 1]])
+    
+def get_extrin(viewMatrix):
+    """
+    Return the extrinsic matrix of the camera
+
+    Args:
+        viewMatrix (tuple): viewMatrix from get_view_matrix
+
+    Returns:
+        numpy array of the extrinsic matrix. 
+    """
+    return np.array(list(viewMatrix)).reshape((4,4))
+
+def get_camera(extrin):
+    """
+    Return a camera object from extrinsic matrix from get_extrin for point cloud
+    generation
+    
+    Args:
+        extrin (numpy array): 4 x 4 extrinsic matrix from get_extrin.
+
+    Returns:
+        camera object for open3d cloud generation. 
+    """
+    intrinsic = o3d.camera.PinholeCameraIntrinsic(IMG_LEN, IMG_LEN, f, f, 
+                                                  (IMG_LEN-1) / 2, 
+                                                  (IMG_LEN-1) / 2)
+    cam = o3d.camera.PinholeCameraParameters()
+    cam.intrinsic = intrinsic
+    cam.extrinsic = extrin
+    return cam
+
+def true_z_from_depth_buffer(depthImg, far = FAR, near = NEAR):
+    """
+    function will take in a depth buffer from depth camera in NDC coordinate and
+    convert it in to true z value. 
+    
+    Args:
+        depthImg (numpy array): real depth in world frame
+    """
+    depthImg = 2 * depthImg - 1
+    depthImg = 2 * far * near / (far + near - (far-near) * depthImg)
+    
+    
+
+def buffer_to_rgbd(rgbImg, depthImg):
+    """
+    function will convert two numpy array to o3d rgbd image for point cloud 
+    generation
+
+    Args:
+        rgbImg (_type_): _description_
+        depthImg (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    
+    depth_as_img = o3d.geometry.Image((depthImg * 1000).astype(np.uint16))
+
+    rgbd_as_img = o3d.geometry.Image((rgbImg).astype(np.uint8))
+
+    rgbd = o3d.geometry.RGBDImage.create_from_color_and_depth(rgbd_as_img, 
+                                                              depth_as_img, 
+                                                 convert_rgb_to_intensity=False, 
+                                                             depth_trunc = 1000)
+    
+    return rgbd
+    
+
+viewMatrix = get_view_matrix([0, 1, 2], 
+                             [0, 0, 0], 
+                             [0, 0, 1])
+
+projectionMatrix = get_projection_matrix()
+
+_, _ , rgbImg, depthImg, _ = get_image(viewMatrix, projectionMatrix)
+
+
+intrin = get_intrin()
+
+extrin = get_extrin(viewMatrix)
+
+cam = get_camera()
+
+depthImg = true_z_from_depth_buffer(depthImg)
+
+rgbd = buffer_to_rgbd(rgbImg, depthImg)
 
 pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd, cam.intrinsic, cam.extrinsic)
 
 # Flip it, otherwise the pointcloud will be upside down
-pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]) #TODO:should i transform
+pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]) 
 # o3d.visualization.draw_geometries([pcd])
 
-
-
-pc_points = np.asarray(pcd.points)
-pc_points = np.swapaxes(pc_points,0,1)
+pc_points = np.swapaxes(np.asarray(pcd.points),0,1)
 pc_points = to_homog(pc_points)
 
-identity = np.identity(3)
-identity = np.hstack([identity, np.array([[0],[0],[0]])])
+identity = np.hstack([np.identity(3), np.array([[0],[0],[0]])])
 
-camera_matrix = intrin @ identity @ extrin
+camera_matrix = intrin @ identity @ extrin # projection matrix 
 
-image = from_homog(camera_matrix @ pc_points)
-
+image = from_homog(camera_matrix @ pc_points) # to 2d points
 
 color = np.asarray(pcd.colors)
 color = np.swapaxes(color,0,1)
 
-
 recover = np.zeros((IMG_LEN, IMG_LEN, 3))
 
-print(f'here: {image}')
 
 image = np.floor(image)
 
