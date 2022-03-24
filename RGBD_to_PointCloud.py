@@ -1,4 +1,3 @@
-from ctypes.wintypes import RGB
 import pybullet as p
 import pybullet_data as pd
 import numpy as np
@@ -133,7 +132,7 @@ def get_extrin(viewMatrix):
     Returns:
         numpy array of the extrinsic matrix. 
     """
-    return np.array(list(viewMatrix)).reshape((4,4))
+    return np.array(list(viewMatrix)).reshape((4,4)).T
 
 def get_camera(extrin):
     """
@@ -193,7 +192,7 @@ def buffer_to_rgbd(rgbImg, depthImg):
     return rgbd
     
 
-viewMatrix = get_view_matrix([0, 1, 2], 
+viewMatrix = get_view_matrix([0, 1, 1], 
                              [0, 0, 0], 
                              [0, 0, 1])
 
@@ -216,7 +215,7 @@ pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd,
                                                      cam.extrinsic)
 
 # Flip it, otherwise the pointcloud will be upside down
-pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]) 
+# pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]) 
 # o3d.visualization.draw_geometries([pcd])
 
 pc_points = np.swapaxes(np.asarray(pcd.points),0,1)
@@ -226,22 +225,26 @@ identity = np.hstack([np.identity(3), np.array([[0],[0],[0]])])
 
 camera_matrix = intrin @ identity @ extrin # projection matrix 
 
+
 image = from_homog(camera_matrix @ pc_points) # to 2d points
 
 color = np.asarray(pcd.colors)
 color = np.swapaxes(color,0,1)
+color = (color * 255).astype(np.uint8)
 
-recover = np.zeros((IMG_LEN, IMG_LEN, 3))
+recover = np.zeros((IMG_LEN, IMG_LEN, 3)).astype(np.uint8)
 
 
 image = np.floor(image)
+image = np.rint(image).astype(np.int64)
 
 for i in range(image.shape[1]):
     x, y = image[:,i]
-    x, y = int(x), int(y)
-    recover[x][y] = color[:,i]
-    
-recover = np.rot90(recover,3)
+    # print(x,y)
+    if x < IMG_LEN and y < IMG_LEN:
+        x, y = int(x), int(y)
+        recover[y][x] = color[:,i]
+        
 
 plt.subplot(1,2,1)
 plt.imshow(recover)
