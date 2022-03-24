@@ -165,6 +165,7 @@ def true_z_from_depth_buffer(depthImg, far = FAR, near = NEAR):
     depthImg = 2 * depthImg - 1
     depthImg = 2 * far * near / (far + near - (far-near) * depthImg)
     
+    return depthImg
     
 
 def buffer_to_rgbd(rgbImg, depthImg):
@@ -200,18 +201,19 @@ projectionMatrix = get_projection_matrix()
 
 _, _ , rgbImg, depthImg, _ = get_image(viewMatrix, projectionMatrix)
 
-
 intrin = get_intrin()
 
 extrin = get_extrin(viewMatrix)
 
-cam = get_camera()
+cam = get_camera(extrin)
 
 depthImg = true_z_from_depth_buffer(depthImg)
 
 rgbd = buffer_to_rgbd(rgbImg, depthImg)
 
-pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd, cam.intrinsic, cam.extrinsic)
+pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd, 
+                                                     cam.intrinsic, 
+                                                     cam.extrinsic)
 
 # Flip it, otherwise the pointcloud will be upside down
 pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]) 
