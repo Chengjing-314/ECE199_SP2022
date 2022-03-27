@@ -192,7 +192,7 @@ def buffer_to_rgbd(rgbImg, depthImg):
     return rgbd
     
 
-viewMatrix = get_view_matrix([-1, 1, 1], 
+viewMatrix = get_view_matrix([0, 1, 3], 
                              [0, 0, 0], 
                              [0, 0, 1])
 
