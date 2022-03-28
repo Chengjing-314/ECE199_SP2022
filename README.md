@@ -1,6 +1,6 @@
 # ECE199 SP2022
 
-## -Usable Objects
+## Usable Objects
 ***Must Include***
 ```python
 import pybullet_data as pd
@@ -29,3 +29,11 @@ pybullet.loadSoftBody(OBJ_PATH,simFileName=VTK_PATH)
 |No.|Object Name|Load Soft Body Path|
 |----|---|----|
 |1|Banana|"/data/banana.obj","/data/banana.vtk"|
+
+## Verification Steps on Point cloud. 
+
+1. Get view matrix and projection matrix, feed in through the get_image function.
+2. Save the RGB and Depth array and get intrinsic and extrinsic matrix.
+3. Project point cloud.
+4. Use camera matrix to get the original image. 
+
