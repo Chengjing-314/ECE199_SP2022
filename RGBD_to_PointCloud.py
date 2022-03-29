@@ -216,7 +216,7 @@ pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd,
 
 # Flip it, otherwise the pointcloud will be upside down
 # pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]) 
-# o3d.visualization.draw_geometries([pcd])
+o3d.visualization.draw_geometries([pcd])
 
 pc_points = np.swapaxes(np.asarray(pcd.points),0,1)
 pc_points = to_homog(pc_points)

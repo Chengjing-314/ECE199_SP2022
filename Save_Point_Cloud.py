@@ -13,7 +13,7 @@ p.setAdditionalSearchPath(pd.getDataPath())
 
 
 planeId = p.loadURDF("plane.urdf")
-pandaUID = p.loadURDF("franka_panda/panda.urdf", useFixedBase = True)
+# pandaUID = p.loadURDF("franka_panda/panda.urdf", useFixedBase = True)
 trayUID = p.loadURDF("tray/traybox.urdf", basePosition=[0.65, 0, 0])
 plateUID = p.loadURDF("data/dinnerware/plate.urdf", basePosition = [0.7, 0, 0.01])
 cup1UID = p.loadURDF("data/dinnerware/cup/cup_small.urdf", basePosition = [0.85, 0.1, 0.01])
@@ -193,7 +193,7 @@ def buffer_to_rgbd(rgbImg, depthImg):
     return rgbd
     
 
-viewMatrix = get_view_matrix([0, 1, 3], 
+viewMatrix = get_view_matrix([0, 1, 2], 
                              [0, 0, 0], 
                              [0, 0, 1])
 
@@ -215,11 +215,8 @@ pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd,
                                                      cam.intrinsic, 
                                                      cam.extrinsic)
 
-alpha = .03
 
-mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_alpha_shape(pcd, alpha)
-mesh.compute_vertex_normals()
-o3d.visualization.draw_geometries([mesh], mesh_show_back_face=True)
+o3d.io.write_point_cloud("pcd.ply", pcd)
 
 
 
