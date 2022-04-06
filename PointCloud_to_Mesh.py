@@ -12,7 +12,7 @@ alpha = 0.05
 
 pcd = o3d.io.read_point_cloud('./pcd.ply')
 
-# pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]) 
+pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]) 
 
 pcd.estimate_normals()
 
@@ -42,12 +42,18 @@ print(mesh)
 
 #o3d.visualization.draw_geometries([mesh])
 
-tri = np.asarray(mesh.triangles)
-vert = np.asarray(mesh.vertices)
-m = fcl.BVHModel()
-m.beginModel(len(vert), len(tri))
-m.addSubModel(vert,tri)
-m.endModel()
+
+
+o3d.io.write_triangle_mesh('./mesh.obj', mesh)
+# tri = np.asarray(mesh.triangles)
+# vert = np.asarray(mesh.vertices)
+
+
+
+# m = fcl.BVHModel()
+# m.beginModel(len(vert), len(tri))
+# m.addSubModel(vert,tri)
+# m.endModel()
 
 print("--- %s seconds ---" % (time.time() - start_time))
 
@@ -64,3 +70,9 @@ print("--- %s seconds ---" % (time.time() - start_time))
 # mesh = mesh.filter_smooth_taubin(8)
 
 # mesh.paint_uniform_color([1, 0.706, 0])
+
+
+
+
+# put mesh back into pybullet 
+# 

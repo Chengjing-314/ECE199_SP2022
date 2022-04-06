@@ -193,7 +193,7 @@ def buffer_to_rgbd(rgbImg, depthImg):
     return rgbd
     
 
-viewMatrix = get_view_matrix([0, 1, 2], 
+viewMatrix = get_view_matrix([0, 1, 3], 
                              [0, 0, 0], 
                              [0, 0, 1])
 
@@ -214,7 +214,6 @@ rgbd = buffer_to_rgbd(rgbImg, depthImg)
 pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd, 
                                                      cam.intrinsic, 
                                                      cam.extrinsic)
-
 
 o3d.io.write_point_cloud("pcd.ply", pcd)
 
