@@ -204,6 +204,11 @@ _, _ , rgbImg, depthImg, _ = get_image(viewMatrix, projectionMatrix)
 intrin = get_intrin()
 
 extrin = get_extrin(viewMatrix)
+from scipy.spatial.transform import Rotation
+convention_rot = Rotation.from_euler('XYZ', angles=[180, 0, 0], degrees=True).as_matrix()
+convention_tf = np.identity(4)
+convention_tf[:3, :3] = convention_rot
+extrin = convention_tf @ extrin
 
 cam = get_camera(extrin)
 

@@ -13,8 +13,8 @@ pandaUID = p.loadURDF("franka_panda/panda.urdf", useFixedBase = True)
 visualID = p.createVisualShape(shapeType=p.GEOM_MESH, fileName="mesh.obj")
 collisionID = p.createCollisionShape(shapeType=p.GEOM_MESH,fileName="mesh.obj")
 p.createMultiBody(baseCollisionShapeIndex=collisionID,
-                  baseVisualShapeIndex=visualID,
-                  basePosition = [0, 2, 6])
+                  baseVisualShapeIndex=visualID)#,
+                #   basePosition = [0, 2, 6])
 
 p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
 

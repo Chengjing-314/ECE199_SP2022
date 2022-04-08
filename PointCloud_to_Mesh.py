@@ -12,7 +12,7 @@ alpha = 0.05
 
 pcd = o3d.io.read_point_cloud('./pcd.ply')
 
-pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]) 
+# pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]) 
 
 pcd.estimate_normals()
 
