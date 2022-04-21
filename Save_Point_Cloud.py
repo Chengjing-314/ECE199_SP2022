@@ -3,7 +3,6 @@ import pybullet_data as pd
 import numpy as np
 import open3d as o3d
 from matplotlib import pyplot as plt
-from PIL import Image
 
 p.connect(p.GUI)
 p.setGravity(0, 0, -10)
