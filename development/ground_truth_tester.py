@@ -40,5 +40,6 @@ while True:
     if(c):
         break
 
+pts = [m[5] for m in c]
 
-print(len(c))
+print(len(pts), pts)
