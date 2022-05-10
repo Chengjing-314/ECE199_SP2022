@@ -28,8 +28,6 @@ def load_scene():
 
 load_scene()
 
-    
-
 viewMatrix = get_view_matrix([0, 1, 3], 
                              [0, 0, 0], 
                              [0, 0, 1])
