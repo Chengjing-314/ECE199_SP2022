@@ -214,8 +214,9 @@ def place_mesh(mesh):
 
 
 def set_joints_and_collision_status(pandaUid, angles, clientID):
+    panda_joint_id = [0,1,2,3,4,5,6,9,10]
     for i in range(len(angles)):
-        p.resetJointState(pandaUid,i,p.POSITION_CONTROL,angles[i])
+        p.resetJointState(pandaUid,panda_joint_id[i],p.POSITION_CONTROL,angles[i])
         
     p.performCollisionDetection(clientID)
     c = p.getContactPoints(bodyA = pandaUid, physicsClientId = clientID)
