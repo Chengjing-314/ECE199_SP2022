@@ -1,5 +1,9 @@
 # ECE199 SP2022
 
+
+## Update
+This repo contain codes that use pybullet to obtain rgbd camera and tools to convert it to Open3d point cloud. The code will not be updated but please use it as you wish.
+
 ## Usable Objects
 ***Must Include***
 ```python
