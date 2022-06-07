@@ -16,7 +16,7 @@ p.setGravity(0, 0, -10)
 p.setAdditionalSearchPath(pd.getDataPath()) 
 
 
-planeId = p.loadURDF("plane.urdf")
+# planeId = p.loadURDF("plane.urdf")
 # pandaUID = p.loadURDF("franka_panda/panda.urdf", useFixedBase = True)
 trayUID = p.loadURDF("tray/traybox.urdf", basePosition=[0.65, 0, 0])
 plateUID = p.loadURDF("data/dinnerware/plate.urdf", basePosition = [0.7, 0, 0.01])

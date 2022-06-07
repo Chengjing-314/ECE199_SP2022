@@ -1,5 +1,6 @@
 import pybullet as p
 import pybullet_data as pd
+from torch import angle
 from scipy.spatial.transform import Rotation
 import numpy as np
 import open3d as o3d
@@ -7,6 +8,7 @@ import math
 from matplotlib import pyplot as plt
 from Pipeline_Util import * 
 from test_util import *
+from tqdm import tqdm
 
 
 
@@ -56,7 +58,9 @@ mesh = pcd_to_mesh(pcd)
 
 p.resetSimulation()
 
-angles = generate_panda_angles(1000)
+iteration = 1000
+
+angles = generate_panda_angles(iteration)
 
 mesh_sim = np.array([])
 
@@ -66,6 +70,7 @@ for i in range(len(angles)):
     meshID = place_mesh(mesh)
     mesh_sim  = np.append(mesh_sim, set_joints_and_collision_status(pandaUid, angles[i], client))
     p.resetSimulation()
+
 
 ground_truth = np.array([])
 
@@ -78,4 +83,30 @@ for i in range(len(angles)):
 
 acc = (np.sum(mesh_sim == ground_truth) / len(ground_truth)) * 100
 
-print("accuracy: ", acc)
+tpos = 0
+fpos = 0
+fneg = 0 
+
+fneg_pose = []
+fpos_pose = []
+
+print(len(ground_truth), len(mesh_sim))
+
+for i in range(len(mesh_sim)):
+    if mesh_sim[i] == True and ground_truth[i] == True:
+        tpos += 1
+    if mesh_sim[i] == False and ground_truth[i] == True:
+        fneg += 1
+        fneg_pose.append(angles[i])
+    if mesh_sim[i] == True and ground_truth[i] == False:
+        fpos += 1
+        fpos_pose.append(angles[i])
+
+recall = tpos / (tpos + fneg)
+
+np.save('experiment_data/fneg.npy', np.array(fneg_pose))
+np.save('experiment_data/fpos.npy', np.array(fpos_pose))
+
+precision = tpos / (tpos + fpos)
+
+print("accuracy: ", acc, "precision: ", precision, "recall: ", recall)

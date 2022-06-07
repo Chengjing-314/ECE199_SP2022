@@ -209,7 +209,7 @@ def place_mesh(mesh):
     collisionID = p.createCollisionShape(shapeType=p.GEOM_MESH,fileName="mesh.obj")
     mID = p.createMultiBody(baseCollisionShapeIndex=collisionID,
                   baseVisualShapeIndex=visualID)
-    os.remove(saveto)
+    #os.remove(saveto) #FIXME: 
     return mID
 
 
@@ -219,6 +219,7 @@ def set_joints_and_collision_status(pandaUid, angles, clientID):
         p.resetJointState(pandaUid,panda_joint_id[i],angles[i])
     p.performCollisionDetection(clientID)
     c = p.getContactPoints(bodyA = pandaUid, physicsClientId = clientID)
-    return True if c else False
+    return True if c else False #FIXME: 
+    # return (True,c[0][5]) if c else False #FIXME: 
         
 

@@ -2,7 +2,7 @@
 
 
 ## Update
-This repo contain codes that use pybullet to obtain rgbd camera and tools to convert it to Open3d point cloud. The code will not be updated but please use it as you wish.
+This repo contain codes that use pybullet to obtain rgbd camera and tools to convert it to Open3d point cloud. 
 
 ## Usable Objects
 ***Must Include***
